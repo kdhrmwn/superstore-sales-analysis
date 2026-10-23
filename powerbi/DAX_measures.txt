@@ -1,0 +1,188 @@
+// ============================================================
+// SUPERSTORE SEASONALITY DASHBOARD — DAX MEASURE LIBRARY
+// Create a blank table named "_Measures" and paste these in.
+// Model: fact_sales (1 row = order line) with these relationships,
+// all single-direction, many-to-one from fact to dim:
+//   fact_sales[OrderDateKey]  -> dim_date[DateKey]        (ACTIVE)
+//   fact_sales[ShipDateKey]   -> dim_date[DateKey]        (INACTIVE - use USERELATIONSHIP)
+//   fact_sales[CustomerKey]   -> dim_customer[CustomerKey]
+//   fact_sales[ProductKey]    -> dim_product[ProductKey]
+//   fact_sales[GeoKey]        -> dim_geography[GeoKey]
+//   fact_sales[ShipModeKey]   -> dim_shipmode[ShipModeKey]
+// Mark dim_date as the date table on [Date].
+// Sort dim_date[MonthName] by [MonthNo]; sort [YearMonth] by [MonthSort].
+// ============================================================
+
+// ---------- 1. BASE ----------
+Total Sales = SUM ( fact_sales[Sales] )
+
+Order Count = DISTINCTCOUNT ( fact_sales[OrderID] )
+
+Line Count = COUNTROWS ( fact_sales )
+
+Active Customers = DISTINCTCOUNT ( fact_sales[CustomerKey] )
+
+Median Order Value =
+MEDIANX (
+    VALUES ( fact_sales[OrderID] ),
+    CALCULATE ( [Total Sales] )
+)
+
+Avg Order Value = DIVIDE ( [Total Sales], [Order Count] )
+
+Lines per Order = DIVIDE ( [Line Count], [Order Count] )
+
+Avg Ship Lag (days) = AVERAGE ( fact_sales[ShipLagDays] )
+
+
+// ---------- 2. TIME INTELLIGENCE ----------
+Sales PY =
+CALCULATE ( [Total Sales], SAMEPERIODLASTYEAR ( dim_date[Date] ) )
+
+YoY % =
+VAR Prior = [Sales PY]
+RETURN IF ( NOT ISBLANK ( Prior ), DIVIDE ( [Total Sales] - Prior, Prior ) )
+
+Sales PM =
+CALCULATE ( [Total Sales], DATEADD ( dim_date[Date], -1, MONTH ) )
+
+MoM % =
+VAR Prior = [Sales PM]
+RETURN IF ( NOT ISBLANK ( Prior ), DIVIDE ( [Total Sales] - Prior, Prior ) )
+
+Sales YTD = TOTALYTD ( [Total Sales], dim_date[Date] )
+
+Sales 3M Rolling Avg =
+AVERAGEX (
+    DATESINPERIOD ( dim_date[Date], MAX ( dim_date[Date] ), -3, MONTH ),
+    CALCULATE ( [Total Sales] )
+)
+
+// Optional: revenue recognised on SHIP date instead of order date
+Sales by Ship Date =
+CALCULATE (
+    [Total Sales],
+    USERELATIONSHIP ( fact_sales[ShipDateKey], dim_date[DateKey] )
+)
+
+
+// ---------- 3. SEASONALITY (the core of this dashboard) ----------
+// Seasonal index: 1.00 = an evenly spread year. >1 = over-indexing month.
+Seasonal Index =
+VAR MonthsInScope =
+    CALCULATE (
+        DISTINCTCOUNT ( dim_date[MonthSort] ),
+        ALLSELECTED ( dim_date )
+    )
+VAR SalesAllMonths =
+    CALCULATE ( [Total Sales], ALLSELECTED ( dim_date ) )
+VAR FlatMonthly = DIVIDE ( SalesAllMonths, MonthsInScope )
+VAR ThisMonths = DISTINCTCOUNT ( dim_date[MonthSort] )
+RETURN
+    DIVIDE ( [Total Sales], FlatMonthly * ThisMonths )
+
+// Share of the currently selected total — use on the monthly bar chart
+Share of Total % =
+DIVIDE (
+    [Total Sales],
+    CALCULATE ( [Total Sales], ALLSELECTED ( dim_date ) )
+)
+
+Peak Sales =
+CALCULATE ( [Total Sales], dim_date[Season] = "Peak" )
+
+Off-peak Sales =
+CALCULATE ( [Total Sales], dim_date[Season] = "Off-peak" )
+
+Peak Share % =
+DIVIDE (
+    [Peak Sales],
+    CALCULATE ( [Total Sales], ALL ( dim_date[Season] ) )
+)
+
+// How lopsided is the year? Crest month / trough month.
+Peak-to-Trough Ratio =
+VAR Monthly =
+    ADDCOLUMNS (
+        ALLSELECTED ( dim_date[MonthNo] ),
+        "@S", CALCULATE ( [Total Sales] )
+    )
+RETURN
+    DIVIDE ( MAXX ( Monthly, [@S] ), MINX ( Monthly, [@S] ) )
+
+// Swing = how seasonal a category is. Bigger = more volatile.
+Seasonal Swing =
+VAR Monthly =
+    ADDCOLUMNS (
+        ALLSELECTED ( dim_date[MonthNo] ),
+        "@I", CALCULATE ( [Seasonal Index] )
+    )
+RETURN
+    MAXX ( Monthly, [@I] ) - MINX ( Monthly, [@I] )
+
+Dead Zone Sales =
+CALCULATE ( [Total Sales], dim_date[DeadZone] = "Jan-Apr dead zone" )
+
+// The size of the prize: revenue needed to bring Jan-Apr up to a flat run rate.
+Dead Zone Gap to Flat =
+VAR YearsInScope = DIVIDE ( CALCULATE ( DISTINCTCOUNT ( dim_date[MonthSort] ), ALLSELECTED ( dim_date ) ), 12 )
+VAR TotalAll = CALCULATE ( [Total Sales], ALLSELECTED ( dim_date ) )
+VAR FlatFourMonths = TotalAll / 12 * 4
+VAR Actual = CALCULATE ( [Dead Zone Sales], ALLSELECTED ( dim_date ) )
+RETURN DIVIDE ( FlatFourMonths - Actual, YearsInScope )
+
+
+// ---------- 4. CONCENTRATION ----------
+Running Sales Total =
+VAR CurrentSales = [Total Sales]
+RETURN
+    SUMX (
+        FILTER (
+            ALLSELECTED ( dim_product[SubCategory] ),
+            CALCULATE ( [Total Sales] ) >= CurrentSales
+        ),
+        CALCULATE ( [Total Sales] )
+    )
+
+Cumulative Share % =
+DIVIDE ( [Running Sales Total], CALCULATE ( [Total Sales], ALLSELECTED ( dim_product[SubCategory] ) ) )
+
+
+// ---------- 5. FORMATTING HELPERS ----------
+YoY Arrow = IF ( [YoY %] >= 0, "▲", "▼" )
+
+YoY Colour =
+IF ( [YoY %] >= 0, "#009E73", "#D55E00" )   // use in conditional formatting > field value
+
+Season Colour =
+IF (
+    SELECTEDVALUE ( dim_date[Season] ) = "Peak",
+    "#0072B2",   // blue: peak months
+    "#BBBBBB"    // grey: context
+)
+
+KPI Subtitle =
+"vs " & FORMAT ( [Sales PY], "$#,0" ) & " last year"
+
+
+// ---------- 6. TWO-WAVE VIEW (Sep peak vs Nov-Dec peak) ----------
+// Requires dim_date[PeakWave]: "Wave 1 (Sep)", "Oct dip", "Wave 2 (Nov-Dec)", "Base".
+// Colour the monthly column chart by this field (blue / grey / pink / grey).
+
+Wave 1 Sales = CALCULATE ( [Total Sales], dim_date[PeakWave] = "Wave 1 (Sep)" )
+
+Wave 2 Sales = CALCULATE ( [Total Sales], dim_date[PeakWave] = "Wave 2 (Nov-Dec)" )
+
+Wave 1 Share % = DIVIDE ( [Wave 1 Sales], CALCULATE ( [Total Sales], ALL ( dim_date[PeakWave] ) ) )
+
+Wave 2 Share % = DIVIDE ( [Wave 2 Sales], CALCULATE ( [Total Sales], ALL ( dim_date[PeakWave] ) ) )
+
+// How deep is the October dip relative to September? Falls toward 0% as the waves merge.
+// Pooled 2015-18 = -34%; 2015-16 = about -51% to -61%; 2017-18 = about -10% to -14%.
+Oct Dip vs Sep % =
+VAR Sep = CALCULATE ( [Total Sales], dim_date[MonthNo] = 9 )
+VAR Oct = CALCULATE ( [Total Sales], dim_date[MonthNo] = 10 )
+RETURN DIVIDE ( Oct - Sep, Sep )
+
+// Per-year seasonal index is the cleanest way to show the merge:
+// line chart, X = dim_date[MonthName] (Aug-Dec), Y = [Seasonal Index], Legend = dim_date[Year].
