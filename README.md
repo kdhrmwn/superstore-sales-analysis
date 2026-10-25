@@ -2,7 +2,7 @@
 
 **Goal** : Identify when revenue starts coming in, which categories contribute most to revenue fluctuations, and how to address the four month dead zone.
 
-**Headline** : Three months (Sep, Nov, Dec) generate **43% of annual revenue** , mainly due to higher order volumes rather than larger purchases.  while Jan to Apr generates only **21.5% of annual revenue**, despite covering one 1/3 of the year, resulting in leaving approximately **$67K a year** on the table.
+**Headline** : Three months (Sep, Nov, Dec) generate **43% of annual revenue** , mainly due to higher order volumes rather than larger purchases. While Jan to Apr generates only **21.5% of annual revenue**, despite covering one third of the year, leaving approximately **$67K a year** on the table.
 
 ![Monthly revenue](visuals/01_monthly_revenue.png)
 
@@ -12,17 +12,17 @@
 
 **1. Revenue is heavily concentrated in three months, and this pattern has remained consistent for four years.**
 
-Sep, Nov, Dec contribute to **43.0% of annual revenue** (95% CI: 39.7–46.2%), significantly higher than the 25.0% expected if revenue were evenly distributed throughout the year. Nov alone generates **$350K**, nearly **5.9× February's $59K**. This trend appeared consistently over the past four years, suggesting a recurring seasonal pattern.
+Sep, Nov, Dec contribute to **43.0% of annual revenue** (95% CI: 39.7–46.2%), significantly higher than the 25.0% expected if revenue were evenly distributed throughout the year. Nov alone generates **$350K**, nearly **5.9× February's $59K**. The trends appears every year, although the peak share has fallen from 47.5% in 2015 to 39.8% in 2018.
 
 **2. Peak revenue is driven by more customers, not higher spending per order.**
 
-Peak months average **703 orders**, compared to **312 orders during off peak months**, showing a **2.3× increase**. Sep also records **454 active customers** compared to just  **145 active customers in February**. However, the median order value remains **$150.07 during peak vs $152.93 during off peak**, with no statistically significant difference (Mann Whitney U test, p = 0.67, n = 2,110 / 2,812). The average lines per order are also similar (1.98 vs 2.00). This indicates that revenue increases mainly because more customers are purchasing, rather than because each customer is spending more.
+During a typical peak month, **703 orders** were placed across four years, compared to **312 orders during off peak months**, showing a **2.3× increase**. Sep also records **454 active customers** compared to just  **145 active customers in February**. However, the median order value remains **$150.07 during peak vs $152.93 during off peak**, with no statistically significant difference (Mann Whitney U test, p = 0.67, n = 2,110 / 2,812). The average lines per order are also similar (1.98 vs 2.00). This indicates that revenue increases mainly because more customers are purchasing, rather than because each customer is spending more.
 
 ![Traffic vs basket](visuals/03_traffic_vs_basket.png)
 
 **3. Furniture is the most seasonal category and the one worth phasing.**
 
-Furniture swings from a **0.26 index in Feb to 2.00 in Dec** , a 1.74 point difference, compared to 1.37 for Office Supplies. Chairs (48% of revenue during peak) and Bookcases (50%) show the greatest seasonal concentration. Meanwhile, Copiers (28%) and Supplies (26%) perform relatively better during slower months, making them valuable categories for maintaining sales during the dead zone.
+Furniture swings from a **0.26 index in Feb to 2.00 in Dec** , a 1.74 point difference, compared to 1.37 for Office Supplies. Chairs (48% of annual revenue during peak) and Bookcases (50%) show the greatest seasonal concentration. Meanwhile, Copiers (28%) and Supplies (26%) perform relatively better during slower months, making them valuable categories for maintaining sales during the dead zone.
 
 ![Season x Category](visuals/02_season_x_category.png)
 
@@ -43,17 +43,17 @@ However, the dip is closing. In 2015 to 2016, October was 51–61% below Septemb
 | # | Action | Supporting Findings | Expected Impact |
 |---|---|---|---|
 | 1 | **Launch a Feb to Mar reactivation campaign** targeting the **383 customers** who buy during the peak but never return during Feb or Mar. Focus on increasing the number of orders. | Finding 2: Peak revenue is driven by more customers, not higher spending per order. | Recovering half the Jan to Apr gap could generate approximately **$33K/yr**, closing the full gap could add **$67K/yr**. |
-| 2 | **Adjust Furniture inventory based on seasonal demand.**, Increase stock ahead of Nov to Dec by **2.00x as baseline** and hold 0.26x inventory during Feb instead of purchasing equal amounts every month. | Finding 3: Furniture's seasonal index 0.26 in Feb to 2.00 in Dec | Reduces excess inventory and tied up capital during Q1 while lowering the risk of stock shortages for Chairs and Bookcases during peak months. |
-| 3 | **Lead the Q1 offer with Copiers and Supplies**, Prioritize these products during slower months because they show more stable demand outside the main sales season. | Finding 3: Copiers and Supplies have relatively low peak season revenue shares of 28% and 26%, respectively. | Helps generate revenue during the dead zone by focusing on products that already perform better during this period. |
+| 2 | **Adjust Furniture inventory based on seasonal demand.** Increase stock ahead of Nov to Dec by **2.00x a normal month** and hold 0.26x inventory during Feb instead of purchasing equal amounts every month. | Finding 3: Furniture's seasonal index 0.26 in Feb to 2.00 in Dec | Reduces excess inventory and tied up capital during Q1 while lowering the risk of stock shortages for Chairs and Bookcases during peak months. |
+| 3 | **Lead the Q1 offer with Copiers and Supplies** Prioritize these products during slower months because they show more stable demand outside the main sales season. | Finding 3: Copiers and Supplies have relatively low peak season revenue shares of 28% and 26%, respectively. | Helps generate revenue during the dead zone by focusing on products that already perform better during this period. |
 | 4 | **Maintain Oct's revenue growth.** Identify opportunities to support October sales. | Oct's seasonal index increased from 0.79 in 2015 to 1.29 in 2018, reducing dependence during peak months. | Supports a more balanced revenue distribution throughout the year and may help extend the period of strong sales. |
 
 **Measurement plan:** track `Order Count` and `Active Customers` for Jan to Apr against the 2018 baseline
-| Month | 2018 Order Count |
-|---|---|
-| Jan | 174 |
-| Feb | 161 |
-| Mar | 346 |
-| Apr | 337 |
+| Month | 2018 Orders | 2018 Active Customers |
+|---|---|---|
+| Jan | 67 | 66|
+| Feb | 52 | 52 |
+| Mar | 117 | 114 |
+| Apr | 115 | 108 |
 
 The main goal is to increase customer participation and order frequency during slower months. **Average Order Value should not be tracked**, since the analysis found no significant seasonal difference in spending per order.
 
@@ -84,10 +84,10 @@ The main goal is to increase customer participation and order frequency during s
 |---|---|---|
 | Initial Data | 9,800 | Original number of records before cleaning. |
 | R1 — Remove Duplicates | 1 | Removed row 3407 (Order ID: US-2015-150119), which was identical to row 3406 across all 17 fields. |
-| R2 — Format Dates as `dd/mm/yyyy` | 9,799 | 0 parse failures, confirmed by day values >12 |
+| R2 — Parse Dates as (dd/mm/yyyy) | 9,799 | 0 parse failures, confirmed by day values >12 |
 | R3 — Fill Missing Postal Codes | 11 | Filled missing postal codes for Burlington, Vermont, with 05401. These values were not used in the analysis. |
 | R4 — Standardize Product Names | 125 | Standardized product names using the most common name for each Product ID. A total of 32 Product IDs had inconsistent names, while their sub categories remained consistent. |
-| R5 — Create Additional Fields | 9,799 | Created Year, Month, Year-Month, Quarter, Shipping Delay (Days), and Season fields. Sepr, Nov, and Dec were classified as peak months. |
+| R5 — Create Additional Fields | 9,799 | Created Year, Month, Year-Month, Quarter, Shipping Delay (Days), and Season fields. Sep, Nov, and Dec were classified as peak months. |
 | R6 — Retain Outliers | 19 | Kept all transactions exceeding $5,000 to preserve actual sales values and avoid understating peak revenue. |
 
 After cleaning, the dataset contains 9,799 records, with total sales of $2,261,255.
@@ -105,16 +105,20 @@ README.md                          ← findings first
 data/raw/train.csv                 ← original public Superstore data
 data/processed/superstore_clean.csv ← cleaned, 9,799 rows
 requirements.txt
-sql/business_queries.sql           ← 8 commented queries (CTEs, windows, JOINs, a view)
+superstore.db                      ← SQLite database (open in DB Browser for SQLite)
+sql/business_queries.sql           ← 8 commented queries (CTEs, window functions, JOINs, subquery, view); tested in SQLite
 python/profile.py                  ← data profiling
 python/clean.py                    ← cleaning + changelog
 python/analyze.py                  ← seasonality analysis + significance tests
+python/build_sqlite.py             ← builds superstore.db for the SQL queries
 python/viz.py                      ← charts 01-04
 python/viz_two_peaks.py            ← charts 05-06 (two seasonal waves)
 python/model.py                    ← builds the Power BI star schema
 visuals/                           ← 6 PNGs, embedded in this README
-powerbi/README_build_spec.md       ← page-by-page dashboard build instructions
-powerbi/DAX_measures.txt           ← 25 measures incl. Seasonal Index, Peak Share, Dead Zone Gap
+tableau/                           ← flat CSVs used by the Tableau dashboard
+dashboard/                         ← dashboard link and screenshot
+powerbi/README_build_spec.md       ← Power BI build instructions (optional; dashboard built in Tableau Public)
+powerbi/DAX_measures.txt           ← Power BI DAX measures (not tested in Power BI)
 powerbi/data/                      ← fact_sales + 5 dimensions, 0 orphan rows
 ```
 
@@ -143,5 +147,5 @@ python python/model.py      # -> powerbi/data/*.csv
 | ProductKey | text | → `dim_product`; 1,861 distinct |
 | GeoKey | text | `State\|City\|PostalCode` → `dim_geography` |
 | ShipModeKey | text | → `dim_shipmode`; 4 values |
-| Sales | float | Line revenue, USD. Min $0.44, median $54.49, max $22,638.48 |
+| Sales | float | Line revenue, USD. Min $0.44, median $54.48, max $22,638.48 |
 | ShipLagDays | int | Ship date − order date; 0–7 days |
