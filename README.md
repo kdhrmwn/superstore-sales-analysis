@@ -1,6 +1,6 @@
 # Superstore Seasonality & Timing Analysis
 
-**Goal** — When does revenue actually arrive, which categories drive the swing, and what should we do about the four-month dead zone?
+**Goal** : When does revenue actually arrive, which categories drive the swing, and what should we do about the four-month dead zone?
 
 **Headline** — Three months (Sep, Nov, Dec) generate **43% of annual revenue** — a peak driven almost entirely by more customers ordering, not by bigger baskets — while Jan–Apr delivers 21.5% of revenue for 33% of the calendar and leaves roughly **$67K a year** on the table.
 
